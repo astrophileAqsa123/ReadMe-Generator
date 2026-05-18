@@ -8,17 +8,18 @@ require("./config/passport");
 
 const app = express();
 
+// Must be first
 app.set("trust proxy", 1);
 
+// Must be before session
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}))
-app.use(express.json());
-app.set("trust proxy", 1);
+}));
 
+app.use(express.json());
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -26,12 +27,15 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     maxAge: 24 * 60 * 60 * 1000,
-    secure: true,        // ← required on HTTPS (Render)
-    sameSite: "none",    // ← required for cross-site cookies
+    secure: true,
+    sameSite: "none",
+    httpOnly: true,
   }
 }));
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.get("/debug", (req, res) => {
   res.json({
     sessionID: req.sessionID,
@@ -41,7 +45,7 @@ app.get("/debug", (req, res) => {
     SERVER_URL: process.env.SERVER_URL,
   });
 });
-// Routes
+
 app.use("/auth", require("./routes/auth"));
 app.use("/api/repos", require("./routes/repo"));
 app.use("/api/readme", require("./routes/readme"));
