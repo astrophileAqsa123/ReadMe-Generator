@@ -10,7 +10,7 @@ function Home() {
         </p>
 
         <a
-          href="http://localhost:5000/auth/github"
+          href="https://readme-generator-j37b.onrender.com/auth/github"
           className="github-btn"
         >
           Login with GitHub
