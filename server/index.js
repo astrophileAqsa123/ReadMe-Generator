@@ -3,15 +3,14 @@ const express = require("express");
 const session = require("express-session");
 const passport = require("passport");
 const cors = require("cors");
+const MemoryStore = require("memorystore")(session);
 
 require("./config/passport");
 
 const app = express();
 
-// Must be first
 app.set("trust proxy", 1);
 
-// Must be before session
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
@@ -25,6 +24,9 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: new MemoryStore({
+    checkPeriod: 86400000, // prune expired entries every 24h
+  }),
   cookie: {
     maxAge: 24 * 60 * 60 * 1000,
     secure: true,
