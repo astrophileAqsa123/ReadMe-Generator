@@ -17,7 +17,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 }  // 1 day
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+    secure: true,        // ← required on HTTPS (Render)
+    sameSite: "none",    // ← required for cross-site cookies
+  }
 }));
 app.use(passport.initialize());
 app.use(passport.session());
