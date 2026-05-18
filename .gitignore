@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build output
+dist/
+build/
+
+# Vite
+.vite/
+
+# Coverage
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+
+# Cache
+.cache/
+.eslintcache
+
+# React
+*.tsbuildinfo
+
+# Server session files
+sessions/
+
+# Optional uploads
+uploads/
+
+# Mac hidden files
+.AppleDouble
+.LSOverride
+
+# Linux hidden files
+*~
+
+# Generated README outputs (optional)
+generated-readmes/
+
+# dotenv backup files
+.env.backup
+.env.save
+
+# Package manager lockfiles (optional — remove if you want committed)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
