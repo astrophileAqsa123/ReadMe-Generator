@@ -142,7 +142,7 @@ function Generator() {
               className="primary-btn full-width"
               onClick={() => generateReadme()}
             >
-              Regenerate
+              Generate New ReadMe
             </button>
 
             <textarea
