@@ -21,29 +21,43 @@ function Generator() {
   const [feedback, setFeedback] = useState("");
   const [toast, setToast] = useState(null);
 
-  const generateReadme = async (customFeedback = "") => {
+  // Fetch repository context only
+  const fetchContext = async () => {
     try {
       setLoading(true);
 
-      let currentContext = context;
+      const contextRes = await api.get(
+        `/api/repos/${owner}/${repo}/context`
+      );
 
-      if (!currentContext) {
-        const contextRes = await api.get(
-          `/api/repos/${owner}/${repo}/context`
-        );
+      setContext(contextRes.data);
+    } catch (error) {
+      console.error(error);
 
-        currentContext = contextRes.data;
-        setContext(currentContext);
-      }
+      setToast({
+        type: "error",
+        message: "Failed to analyze repository"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate README manually
+  const generateReadme = async (customFeedback = "") => {
+    try {
+      setLoading(true);
 
       const payload = {
         repoName: repo,
         description: repoData?.description || "",
         language: repoData?.language || "",
-        fileTree: currentContext.fileTree,
-        keyFiles: currentContext.keyFiles,
+        fileTree: context?.fileTree || [],
+        keyFiles: context?.keyFiles || [],
         feedback: customFeedback,
-        currentReadme: markdown
+
+        // Empty on regenerate, keep current on refine
+        currentReadme: customFeedback ? markdown : ""
       };
 
       const readmeRes = await api.post(
@@ -52,8 +66,16 @@ function Generator() {
       );
 
       setMarkdown(readmeRes.data.readme || readmeRes.data);
+
+      setToast({
+        type: "success",
+        message: customFeedback
+          ? "README refined successfully"
+          : "README generated successfully"
+      });
     } catch (error) {
       console.error(error);
+
       setToast({
         type: "error",
         message: "Failed to generate README"
@@ -63,8 +85,9 @@ function Generator() {
     }
   };
 
+  // Only analyze repository on load
   useEffect(() => {
-    generateReadme();
+    fetchContext();
   }, []);
 
   const pushToGithub = async () => {
@@ -89,12 +112,19 @@ function Generator() {
   };
 
   const copyMarkdown = async () => {
-    await navigator.clipboard.writeText(markdown);
+    try {
+      await navigator.clipboard.writeText(markdown);
 
-    setToast({
-      type: "success",
-      message: "Copied to clipboard"
-    });
+      setToast({
+        type: "success",
+        message: "Copied to clipboard"
+      });
+    } catch {
+      setToast({
+        type: "error",
+        message: "Failed to copy"
+      });
+    }
   };
 
   return (
@@ -117,6 +147,7 @@ function Generator() {
       </div>
 
       <div className="generator-layout">
+        {/* LEFT PANEL */}
         <div className="left-panel">
           <h2>Generated README</h2>
 
@@ -124,11 +155,21 @@ function Generator() {
             <div className="center-screen">
               <LoadingSpinner text="Analyzing repository..." />
             </div>
-          ) : (
+          ) : markdown ? (
             <MarkdownPreview content={markdown} />
+          ) : (
+            <div className="empty-state">
+              <h3>No README Generated Yet</h3>
+
+              <p>
+                Click the button on the right to generate a
+                professional README using AI.
+              </p>
+            </div>
           )}
         </div>
 
+        {/* RIGHT PANEL */}
         <div className="right-panel">
           <div className="action-card">
             <h2>{repo}</h2>
@@ -141,8 +182,9 @@ function Generator() {
             <button
               className="primary-btn full-width"
               onClick={() => generateReadme()}
+              disabled={loading || !context}
             >
-              Generate New ReadMe
+              Generate README
             </button>
 
             <textarea
@@ -154,6 +196,7 @@ function Generator() {
             <button
               className="secondary-btn full-width"
               onClick={() => generateReadme(feedback)}
+              disabled={!markdown || loading}
             >
               Refine with AI
             </button>
@@ -163,6 +206,7 @@ function Generator() {
             <button
               className="primary-btn full-width push-btn"
               onClick={pushToGithub}
+              disabled={!markdown}
             >
               Push to GitHub
             </button>
@@ -170,6 +214,7 @@ function Generator() {
             <button
               className="secondary-btn full-width"
               onClick={copyMarkdown}
+              disabled={!markdown}
             >
               Copy to Clipboard
             </button>
@@ -178,11 +223,17 @@ function Generator() {
           <div className="file-tree">
             <h3>Detected Files</h3>
 
-            {context?.fileTree?.map((file, index) => (
-              <div key={index} className="file-item">
-                {file}
-              </div>
-            ))}
+            {loading ? (
+              <LoadingSpinner text="Scanning files..." />
+            ) : context?.fileTree?.length ? (
+              context.fileTree.map((file, index) => (
+                <div key={index} className="file-item">
+                  {file}
+                </div>
+              ))
+            ) : (
+              <p>No files detected</p>
+            )}
           </div>
         </div>
       </div>
