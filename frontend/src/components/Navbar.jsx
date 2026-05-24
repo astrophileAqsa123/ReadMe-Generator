@@ -18,11 +18,7 @@ function Navbar({ user }) {
       <div className="navbar-logo">README Generator</div>
 
       <div className="navbar-right">
-        <img
-          src={user?.avatar_url}
-          alt="avatar"
-          className="avatar"
-        />
+        
 
         <span className="username">{user?.login}</span>
 
