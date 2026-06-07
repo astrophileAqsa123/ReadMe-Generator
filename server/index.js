@@ -38,15 +38,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get("/debug", (req, res) => {
-  res.json({
-    sessionID: req.sessionID,
-    user: req.user || null,
-    cookies: req.headers.cookie || "NO COOKIES RECEIVED",
-    CLIENT_URL: process.env.CLIENT_URL,
-    SERVER_URL: process.env.SERVER_URL,
-  });
-});
+
 
 app.use("/auth", require("./routes/auth"));
 app.use("/api/repos", require("./routes/repo"));
