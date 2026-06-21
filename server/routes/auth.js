@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const passport = require("passport");
+const User = require("../models/User");
 
 // Step 1: redirect to GitHub
 router.get("/github", passport.authenticate("github"));
@@ -8,11 +9,25 @@ router.get("/github", passport.authenticate("github"));
 router.get(
   "/github/callback",
   passport.authenticate("github", { failureRedirect: "/" }),
-  (req, res) => {
+  async (req, res) => {
+    const githubUser = req.user;
+
+    await User.findOneAndUpdate(
+      { githubId: githubUser.id },
+      {
+        githubId: githubUser.id,
+        username: githubUser.username,
+        displayName: githubUser.displayName,
+        avatar: githubUser.avatar,
+        lastLogin: new Date(),
+        $inc: { loginCount: 1 },
+      },
+      { upsert: true, new: true }
+    );
+
     res.redirect(`${process.env.CLIENT_URL}/dashboard`);
   }
 );
-
 // Get current logged-in user
 router.get("/me", (req, res) => {
   if (req.user) return res.json(req.user);

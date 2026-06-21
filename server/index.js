@@ -4,11 +4,13 @@ const session = require("express-session");
 const passport = require("passport");
 const cors = require("cors");
 const MemoryStore = require("memorystore")(session);
+const connectDB = require("./config/db");
 
 require("./config/passport");
 
 const app = express();
 
+connectDB();
 app.set("trust proxy", 1);
 
 app.use(cors({
@@ -37,7 +39,6 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 
 app.use("/auth", require("./routes/auth"));
