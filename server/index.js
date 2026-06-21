@@ -19,8 +19,9 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
+app.use(express.json({ limit: "10mb" })); // adjust as needed
 
-app.use(express.json());
+
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
